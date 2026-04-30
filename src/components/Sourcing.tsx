@@ -1,18 +1,18 @@
-import * as React from "react";
+import type { ElementType } from "react";
 import { motion } from "motion/react";
 import { ShieldCheck, Beaker, Leaf, TreePine } from "lucide-react";
 
 interface FeatureProps {
-  icon: React.ElementType;
+  icon: ElementType;
   title: string;
   description: string;
   id: string;
 }
 
 const Feature = ({ icon: Icon, title, description, id }: FeatureProps) => (
-  <div id={id} className="flex flex-col gap-6 p-10 bg-kava-bg border border-kava-gold/10 rounded-sm hover:border-kava-gold/40 transition-all group relative overflow-hidden">
-    <div className="absolute top-0 right-0 w-24 h-24 bg-kava-gold/5 rounded-full translate-x-12 -translate-y-12 blur-2xl group-hover:bg-kava-gold/10 transition-all"></div>
-    <div className="w-12 h-12 border border-kava-gold/30 rounded-full flex items-center justify-center text-kava-gold group-hover:scale-110 transition-all duration-500">
+  <div id={id} className="flex flex-col gap-6 p-10 bg-kava-bg border border-kava-gold/10 rounded-sm hover:border-kava-gold/40 transition-all group relative overflow-hidden cursor-pointer">
+    <div className="absolute top-0 right-0 w-24 h-24 bg-kava-gold/5 rounded-full translate-x-12 -translate-y-12 blur-2xl group-hover:bg-kava-gold/10 transition-all" aria-hidden="true"></div>
+    <div className="w-12 h-12 border border-kava-gold/30 rounded-full flex items-center justify-center text-kava-gold group-hover:text-kava-gold/80 transition-colors duration-300" aria-hidden="true">
       <Icon size={20} strokeWidth={1.5} />
     </div>
     <h3 className="text-xl font-display font-medium tracking-tight text-kava-cream">{title}</h3>
@@ -22,24 +22,24 @@ const Feature = ({ icon: Icon, title, description, id }: FeatureProps) => (
 
 const Sourcing = () => {
   return (
-    <section id="sourcing" className="py-32 bg-kava-bg border-y border-kava-gold/10 relative">
-      <div className="container mx-auto px-12">
+    <section id="sourcing" aria-label="Our sourcing story" className="py-32 bg-kava-bg border-t border-kava-gold/10 relative">
+      <div className="container mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center mb-32">
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="relative rounded-sm overflow-hidden aspect-[4/5] border border-kava-gold/20 p-2 bg-kava-dark"
+            className="relative rounded-sm overflow-hidden aspect-[4/5] border border-kava-gold/20 p-2 bg-kava-dark group"
           >
             <div className="w-full h-full relative overflow-hidden">
                 <img
-                  src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=1200&auto=format&fit=crop"
-                  alt="Kava Sourcing"
-                  className="w-full h-full object-cover grayscale brightness-75"
-                  referrerPolicy="no-referrer"
+                  src="/cave.jpg"
+                  alt="Majestic cave with sunlight streaming into a clear pool"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000"
+                  loading="lazy"
                 />
             </div>
-            <div className="absolute top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-kava-gold/40"></div>
+            <div className="absolute top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-kava-gold/40 z-10" aria-hidden="true"></div>
           </motion.div>
 
           <div className="space-y-10">
@@ -64,7 +64,7 @@ const Sourcing = () => {
                   <div className="text-3xl font-light text-kava-gold">100%</div>
                   <div className="text-[9px] uppercase tracking-[0.2em] font-bold text-kava-muted">Estate Grown</div>
                 </div>
-                <div className="w-[1px] h-12 bg-kava-gold/10 hidden sm:block" />
+                <div className="w-[1px] h-12 bg-kava-gold/10 hidden sm:block" aria-hidden="true" />
                 <div className="space-y-1">
                   <div className="text-3xl font-light text-kava-gold">5,000+</div>
                   <div className="text-[9px] uppercase tracking-[0.2em] font-bold text-kava-muted">Farmers Partnered</div>
