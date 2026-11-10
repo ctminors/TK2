@@ -8,6 +8,9 @@ import Footer from "./components/Footer";
 import { motion } from "motion/react";
 import { Award, ShieldCheck, FlaskConical, Leaf, ExternalLink } from "lucide-react";
 
+// Temporarily hidden — flip to true to bring back "The Collection" section.
+const SHOW_COLLECTION = false;
+
 export default function App() {
   return (
     <main className="relative perspective-1000 overflow-x-hidden">
@@ -92,6 +95,7 @@ export default function App() {
       <Education />
 
       {/* Product Collection */}
+      {SHOW_COLLECTION && (
       <section id="products" aria-label="Shop our kava collection" className="py-32 bg-kava-bg">
         <div className="container mx-auto px-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-20">
@@ -253,6 +257,7 @@ export default function App() {
           </motion.div>
         </div>
       </section>
+      )}
 
       {/* Reviews — social proof section */}
       <Reviews />
