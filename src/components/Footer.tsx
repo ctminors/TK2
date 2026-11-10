@@ -37,7 +37,7 @@ const Footer = () => {
               <li><a href="#" className="hover:text-kava-gold transition-colors cursor-pointer">Instant Kava</a></li>
               <li><a href="#" className="hover:text-kava-gold transition-colors cursor-pointer">Starter Kits</a></li>
               <li><a href="#" className="hover:text-kava-gold transition-colors cursor-pointer">Coconut Bowls &amp; Accessories</a></li>
-              <li><a href="#" className="hover:text-kava-gold transition-colors cursor-pointer">Wholesale &amp; Bulk</a></li>
+              <li><a href="/wholesale" className="hover:text-kava-gold transition-colors cursor-pointer">Wholesale &amp; Bulk</a></li>
             </ul>
           </nav>
 
@@ -45,7 +45,7 @@ const Footer = () => {
           <nav aria-label="Learn navigation">
             <h4 className="font-bold text-kava-gold mb-10 uppercase tracking-[0.3em] text-[10px]">Learn</h4>
             <ul className="space-y-5 text-kava-muted font-light text-sm tracking-tight">
-              <li><a href="#education" className="hover:text-kava-gold transition-colors cursor-pointer">The Kava Guide</a></li>
+              <li><a href="/#education" className="hover:text-kava-gold transition-colors cursor-pointer">The Kava Guide</a></li>
               <li><a href="#" className="hover:text-kava-gold transition-colors cursor-pointer">Noble vs Tudei Kava</a></li>
               <li><a href="#" className="hover:text-kava-gold transition-colors cursor-pointer">Lab Reports (COAs)</a></li>
               <li><a href="#" className="hover:text-kava-gold transition-colors cursor-pointer">FAQs</a></li>

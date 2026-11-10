@@ -25,10 +25,10 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { href: "#sourcing", label: "Shop" },
-    { href: "#quality", label: "Our Story" },
-    { href: "#education", label: "The Science" },
-    { href: "#", label: "Wholesale" },
+    { href: "/#sourcing", label: "Shop" },
+    { href: "/#quality", label: "Our Story" },
+    { href: "/#education", label: "The Science" },
+    { href: "/wholesale", label: "Wholesale" },
   ];
 
   return (
