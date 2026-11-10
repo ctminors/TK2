@@ -21,8 +21,8 @@ import { SilkBackground } from "../components/ui/silk-background-animation";
 
 // TODO(Tamava): replace with the real wholesale product list (names, pack sizes,
 // and minimums). Prices stay off the page; they're confirmed on the invoice.
-// Each `id` becomes a form field named `qty-<id>` — keep index.html's hidden
-// Netlify form in sync when this list changes.
+// Each `id` becomes a form field named `qty-<id>`; the order sheet adds a
+// column for each new one automatically.
 export const WHOLESALE_PRODUCTS = [
   {
     id: "root-powder-1kg",
@@ -44,7 +44,9 @@ export const WHOLESALE_PRODUCTS = [
   },
 ];
 
-const FORM_NAME = "wholesale-order";
+// Google Apps Script web app that appends each order to the order sheet and
+// emails it. Set in Vercel → Settings → Environment Variables (and .env.local).
+const ORDER_SHEET_URL = import.meta.env.VITE_ORDER_SHEET_URL;
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -52,11 +54,6 @@ const fadeUp = {
   viewport: { once: true },
   transition: { duration: 0.8 },
 };
-
-const encode = (data: Record<string, string>) =>
-  Object.keys(data)
-    .map((k) => `${encodeURIComponent(k)}=${encodeURIComponent(data[k])}`)
-    .join("&");
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -84,12 +81,15 @@ function OrderForm() {
     setStatus("sending");
 
     try {
-      const res = await fetch("/", {
+      if (!ORDER_SHEET_URL) throw new Error("VITE_ORDER_SHEET_URL is not set");
+      // Apps Script doesn't send CORS headers, so this is a "no-cors" simple
+      // request: the order is delivered, but the response can't be read. A
+      // network failure still throws and shows the error message.
+      await fetch(ORDER_SHEET_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encode({ "form-name": FORM_NAME, ...data }),
+        mode: "no-cors",
+        body: new URLSearchParams(data),
       });
-      if (!res.ok) throw new Error(String(res.status));
       setStatus("sent");
       form.reset();
     } catch {
@@ -111,15 +111,7 @@ function OrderForm() {
   }
 
   return (
-    <form
-      name={FORM_NAME}
-      method="POST"
-      data-netlify="true"
-      netlify-honeypot="bot-field"
-      onSubmit={handleSubmit}
-      className="space-y-14"
-    >
-      <input type="hidden" name="form-name" value={FORM_NAME} />
+    <form name="wholesale-order" onSubmit={handleSubmit} className="space-y-14">
       <p className="hidden">
         <label>
           Don't fill this out: <input name="bot-field" tabIndex={-1} autoComplete="off" />

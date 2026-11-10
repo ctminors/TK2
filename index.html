@@ -10,22 +10,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Netlify Forms detects forms at deploy time from static HTML. This hidden copy
-         registers the React wholesale order form; keep its fields in sync with
-         src/pages/Wholesale.tsx (one qty-<id> per product). -->
-    <form name="wholesale-order" netlify netlify-honeypot="bot-field" hidden>
-      <input name="bot-field" />
-      <input name="qty-root-powder-1kg" />
-      <input name="qty-root-powder-varietal-1" />
-      <input name="qty-instant-powder-varietal-2" />
-      <input name="business" />
-      <input name="contact" />
-      <input name="email" />
-      <input name="phone" />
-      <textarea name="address"></textarea>
-      <input name="delivery-date" />
-      <textarea name="notes"></textarea>
-    </form>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
