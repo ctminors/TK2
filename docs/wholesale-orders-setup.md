@@ -8,7 +8,7 @@ Create the sheet in the organization's Google account, not a personal one.
 
 1. **Create the sheet.** In Google Drive, create a new Google Sheet named e.g. "Tamava wholesale orders".
 2. **Add the script.** In the sheet: **Extensions → Apps Script**. Delete the sample code, paste in everything from [`google-apps-script/wholesale-orders.gs`](../google-apps-script/wholesale-orders.gs) and save.
-3. **Set the notification inbox.** In the Apps Script editor: **Project Settings (gear) → Script Properties → Add script property**. Property `NOTIFY_EMAIL`, value: the inbox that should receive orders.
+3. **Set the notification inbox.** In the Apps Script editor: **Project Settings (gear) → Script Properties → Add script property**. Property `NOTIFY_EMAIL`, value: the inbox that should receive orders. For more than one, separate the addresses with a comma (`orders@example.com, you@example.com`).
 4. **Deploy it.** **Deploy → New deployment → Select type: Web app.**
    - Execute as: **Me**
    - Who has access: **Anyone**
