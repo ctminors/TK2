@@ -60,9 +60,55 @@ const inputBase =
 const inputClass = `w-full ${inputBase}`;
 const labelClass = "block text-[10px] uppercase tracking-[0.2em] font-bold text-kava-muted mb-2";
 
+// "Remember my details": business and contact fields are kept in this
+// browser's localStorage only (never notes or quantities), so repeat orders
+// from the same device fill themselves in. Storage can be blocked or cleared,
+// so every read and write is wrapped and the form works without it.
+const SAVED_DETAILS_KEY = "tamava-wholesale-details";
+const SAVED_FIELDS = ["business", "contact", "email", "phone", "address"] as const;
+type SavedDetails = Partial<Record<(typeof SAVED_FIELDS)[number], string>>;
+
+function loadDetails(): SavedDetails | null {
+  try {
+    const raw = localStorage.getItem(SAVED_DETAILS_KEY);
+    return raw ? (JSON.parse(raw) as SavedDetails) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveDetails(data: Record<string, string>) {
+  const details: SavedDetails = {};
+  SAVED_FIELDS.forEach((f) => (details[f] = data[f] ?? ""));
+  try {
+    localStorage.setItem(SAVED_DETAILS_KEY, JSON.stringify(details));
+  } catch {
+    /* storage unavailable: nothing to remember */
+  }
+}
+
+function forgetDetails() {
+  try {
+    localStorage.removeItem(SAVED_DETAILS_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 function OrderForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [formError, setFormError] = useState("");
+  const [saved, setSaved] = useState<SavedDetails | null>(loadDetails);
+  const [remember, setRemember] = useState(() => saved !== null);
+  // Changing this remounts the detail fields, clearing them after "Forget".
+  const [detailsKey, setDetailsKey] = useState(0);
+
+  const handleForget = () => {
+    forgetDetails();
+    setSaved(null);
+    setRemember(false);
+    setDetailsKey((k) => k + 1);
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -88,6 +134,8 @@ function OrderForm() {
         mode: "no-cors",
         body: new URLSearchParams(data),
       });
+      if (remember) saveDetails(data);
+      else forgetDetails();
       setStatus("sent");
       form.reset();
     } catch {
@@ -151,23 +199,28 @@ function OrderForm() {
       </fieldset>
 
       {/* Business details */}
-      <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <fieldset key={detailsKey} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <legend className="font-serif text-2xl text-kava-cream mb-6 md:col-span-2">2. Who's it for?</legend>
+        {saved && (
+          <p className="md:col-span-2 -mt-2 text-sm text-kava-gold/90 font-light">
+            Welcome back. We've filled in your details from last time.
+          </p>
+        )}
         <div>
           <label htmlFor="business" className={labelClass}>Business name</label>
-          <input id="business" name="business" required autoComplete="organization" className={inputClass} />
+          <input id="business" name="business" required autoComplete="organization" defaultValue={saved?.business} className={inputClass} />
         </div>
         <div>
           <label htmlFor="contact" className={labelClass}>Contact name</label>
-          <input id="contact" name="contact" required autoComplete="name" className={inputClass} />
+          <input id="contact" name="contact" required autoComplete="name" defaultValue={saved?.contact} className={inputClass} />
         </div>
         <div>
           <label htmlFor="email" className={labelClass}>Email</label>
-          <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} />
+          <input id="email" name="email" type="email" required autoComplete="email" defaultValue={saved?.email} className={inputClass} />
         </div>
         <div>
           <label htmlFor="phone" className={labelClass}>Phone</label>
-          <input id="phone" name="phone" type="tel" required autoComplete="tel" className={inputClass} />
+          <input id="phone" name="phone" type="tel" required autoComplete="tel" defaultValue={saved?.phone} className={inputClass} />
         </div>
         <div className="md:col-span-2">
           <label htmlFor="address" className={labelClass}>Delivery or shipping address</label>
@@ -177,6 +230,7 @@ function OrderForm() {
             required
             rows={2}
             autoComplete="street-address"
+            defaultValue={saved?.address}
             className={inputClass}
           />
         </div>
@@ -189,6 +243,30 @@ function OrderForm() {
             placeholder="Loading dock, gate code, a product you'd like us to stock…"
             className={inputClass}
           />
+        </div>
+        <div className="md:col-span-2 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <label className="inline-flex items-center gap-3 cursor-pointer text-sm text-kava-cream/90 font-light">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+              className="w-4 h-4 accent-kava-gold cursor-pointer"
+            />
+            Remember my details on this device
+          </label>
+          {saved && (
+            <button
+              type="button"
+              onClick={handleForget}
+              className="text-xs text-kava-muted underline underline-offset-2 hover:text-kava-gold cursor-pointer"
+            >
+              Forget my details
+            </button>
+          )}
+          <p className="basis-full text-xs text-kava-muted/70 font-light">
+            Saves your business and contact details in this browser only, so your next order fills itself in.
+            Leave it unticked on a shared computer.
+          </p>
         </div>
       </fieldset>
 
