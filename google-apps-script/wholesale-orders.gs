@@ -21,6 +21,11 @@ const FIXED_COLUMNS = [
   ['notes', 'Notes'],
 ];
 
+// Health check: opening the web app URL in a browser should show {"ok":true,...}.
+function doGet() {
+  return json_({ ok: true, service: 'tamava-wholesale-orders' });
+}
+
 function doPost(e) {
   const p = (e && e.parameter) || {};
 

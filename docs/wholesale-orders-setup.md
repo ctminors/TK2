@@ -13,10 +13,11 @@ Create the sheet in the organization's Google account, not a personal one.
    - Execute as: **Me**
    - Who has access: **Anyone**
    - Click **Deploy**, approve the permissions it asks for (it needs to edit this sheet and send email as you), and copy the **Web app URL** (ends in `/exec`).
+   - Check it: open the URL in a browser. It should show `{"ok":true,"service":"tamava-wholesale-orders"}`. An "Error: Script function not found" page means the deployment is running old code. Save the script and make a new version, or create a fresh deployment (new URL) if that doesn't fix it.
 5. **Give the URL to the site.**
    - Vercel: **Project → Settings → Environment Variables**, add `VITE_ORDER_SHEET_URL` = the web app URL (Production and Preview), then redeploy.
    - Local: put the same line in `.env.local` as `VITE_ORDER_SHEET_URL=https://script.google.com/macros/s/.../exec` and restart `npm run dev`.
-6. **Test.** Send an order from `/wholesale`. A row should appear on the **Orders** tab within a few seconds, and the email should arrive.
+6. **Test.** Send an order from `/wholesale`. A row should appear on the **Orders** tab (the script creates this tab; it isn't Sheet1) within a few seconds, and the email should arrive.
 
 ## How the sheet works
 
