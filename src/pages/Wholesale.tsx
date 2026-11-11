@@ -55,8 +55,6 @@ const fadeUp = {
   transition: { duration: 0.8 },
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
-
 const inputBase =
   "[color-scheme:dark] bg-kava-deep/60 border border-kava-gold/20 rounded-sm px-4 py-3 text-sm text-kava-cream placeholder:text-kava-muted/50 focus:outline-2 focus:outline-kava-gold focus:outline-offset-2 focus:border-kava-gold/60 transition-colors";
 const inputClass = `w-full ${inputBase}`;
@@ -172,7 +170,7 @@ function OrderForm() {
           <input id="phone" name="phone" type="tel" required autoComplete="tel" className={inputClass} />
         </div>
         <div className="md:col-span-2">
-          <label htmlFor="address" className={labelClass}>Delivery address (South Florida)</label>
+          <label htmlFor="address" className={labelClass}>Delivery or shipping address</label>
           <textarea
             id="address"
             name="address"
@@ -182,17 +180,13 @@ function OrderForm() {
             className={inputClass}
           />
         </div>
-        <div>
-          <label htmlFor="delivery-date" className={labelClass}>Preferred delivery date</label>
-          <input id="delivery-date" name="delivery-date" type="date" min={today()} className={inputClass} />
-        </div>
         <div className="md:col-span-2">
           <label htmlFor="notes" className={labelClass}>Notes</label>
           <textarea
             id="notes"
             name="notes"
             rows={4}
-            placeholder="Delivery window, loading dock, a product you'd like us to stock…"
+            placeholder="Loading dock, gate code, a product you'd like us to stock…"
             className={inputClass}
           />
         </div>
@@ -312,8 +306,8 @@ export default function Wholesale() {
               },
               {
                 icon: Truck,
-                title: "Hand-delivered in South Florida",
-                body: "No freight depots or lost pallets. A member of our team brings your order to your door and makes sure it arrives right.",
+                title: "Hand-delivered in Palm Beach County",
+                body: "Local orders arrive with a member of our team, not a courier. Everywhere else, we ship your order straight to you.",
               },
             ].map(({ icon: Icon, title, body }, i) => (
               <motion.div
@@ -414,7 +408,7 @@ export default function Wholesale() {
               { icon: ClipboardList, title: "Send your order", body: "Pick your products and quantities below. It takes about two minutes." },
               { icon: MailCheck, title: "We confirm & invoice", body: "We review your order and email you a confirmation with your invoice." },
               { icon: Landmark, title: "Pay by ACH", body: "Settle the invoice by bank transfer. No card fees, no surprises." },
-              { icon: PackageCheck, title: "Hand-delivered", body: "We bring your kava to your door, anywhere we deliver in South Florida." },
+              { icon: PackageCheck, title: "Delivered or shipped", body: "Hand-delivered across Palm Beach County on our delivery day. Everywhere else, we ship it to you." },
             ].map(({ icon: Icon, title, body }, i) => (
               <motion.li
                 key={title}
@@ -463,7 +457,7 @@ export default function Wholesale() {
             {[
               {
                 q: "Where do you deliver?",
-                a: "We currently deliver by hand across South Florida. If you're further afield, send an order anyway and add a note. We'd like to hear where demand is.",
+                a: "We hand-deliver across Palm Beach County, and every local order goes out on the same delivery day. We'll confirm the date when we send your invoice. Outside Palm Beach County, we ship your order instead, and shipping is added to your invoice.",
               },
               {
                 q: "How do I pay?",

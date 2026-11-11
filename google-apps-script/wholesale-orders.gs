@@ -17,8 +17,7 @@ const FIXED_COLUMNS = [
   ['contact', 'Contact'],
   ['email', 'Email'],
   ['phone', 'Phone'],
-  ['address', 'Delivery address'],
-  ['delivery-date', 'Preferred delivery'],
+  ['address', 'Delivery or shipping address'],
   ['notes', 'Notes'],
 ];
 
@@ -106,8 +105,7 @@ function notify_(p, sheet) {
     'Contact: ' + (p.contact || ''),
     'Email: ' + (p.email || ''),
     'Phone: ' + (p.phone || ''),
-    'Delivery address: ' + (p.address || ''),
-    'Preferred delivery: ' + (p['delivery-date'] || ''),
+    'Delivery or shipping address: ' + (p.address || ''),
     'Notes: ' + (p.notes || ''),
     '',
     'Order sheet: ' + sheet.getParent().getUrl(),

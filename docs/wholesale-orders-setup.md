@@ -20,7 +20,7 @@ Create the sheet in the organization's Google account, not a personal one.
 
 ## How the sheet works
 
-- Columns: Received, Status, Business, Contact, Email, Phone, Delivery address, Preferred delivery, Notes, then one **Qty:** column per product. New products on the page get a new column automatically.
+- Columns: Received, Status, Business, Contact, Email, Phone, Delivery or shipping address, Notes, then one **Qty:** column per product. New products on the page get a new column automatically.
 - **Status** starts as `New`. Change it by hand as the order moves along (e.g. Approved → Invoiced → Paid → Delivered).
 - Hidden spam field: submissions that fill it are dropped silently.
 
