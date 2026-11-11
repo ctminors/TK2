@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { motion } from "motion/react";
 import {
   Leaf,
@@ -65,7 +65,7 @@ const labelClass = "block text-[10px] uppercase tracking-[0.2em] font-bold text-
 // from the same device fill themselves in. Storage can be blocked or cleared,
 // so every read and write is wrapped and the form works without it.
 const SAVED_DETAILS_KEY = "tamava-wholesale-details";
-const SAVED_FIELDS = ["business", "contact", "email", "phone", "address"] as const;
+const SAVED_FIELDS = ["business", "contact", "email", "phone", "street", "unit", "city", "state", "zip"] as const;
 type SavedDetails = Partial<Record<(typeof SAVED_FIELDS)[number], string>>;
 
 function loadDetails(): SavedDetails | null {
@@ -95,6 +95,35 @@ function forgetDetails() {
   }
 }
 
+// US phone mask: digits are shown as (561) 555-1234 while typing.
+function formatPhone(digits: string) {
+  if (digits.length === 0) return "";
+  if (digits.length <= 3) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+}
+
+// Keeps up to 10 digits, dropping a leading US country code ("+1 561…").
+function phoneDigits(value: string) {
+  let digits = value.replace(/\D/g, "");
+  if (digits.length > 10 && digits[0] === "1") digits = digits.slice(1);
+  return digits.slice(0, 10);
+}
+
+const US_STATES: [string, string][] = [
+  ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"], ["CA", "California"],
+  ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"], ["DC", "District of Columbia"],
+  ["FL", "Florida"], ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"], ["IL", "Illinois"],
+  ["IN", "Indiana"], ["IA", "Iowa"], ["KS", "Kansas"], ["KY", "Kentucky"], ["LA", "Louisiana"],
+  ["ME", "Maine"], ["MD", "Maryland"], ["MA", "Massachusetts"], ["MI", "Michigan"], ["MN", "Minnesota"],
+  ["MS", "Mississippi"], ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"], ["NV", "Nevada"],
+  ["NH", "New Hampshire"], ["NJ", "New Jersey"], ["NM", "New Mexico"], ["NY", "New York"],
+  ["NC", "North Carolina"], ["ND", "North Dakota"], ["OH", "Ohio"], ["OK", "Oklahoma"], ["OR", "Oregon"],
+  ["PA", "Pennsylvania"], ["RI", "Rhode Island"], ["SC", "South Carolina"], ["SD", "South Dakota"],
+  ["TN", "Tennessee"], ["TX", "Texas"], ["UT", "Utah"], ["VT", "Vermont"], ["VA", "Virginia"],
+  ["WA", "Washington"], ["WV", "West Virginia"], ["WI", "Wisconsin"], ["WY", "Wyoming"],
+];
+
 function OrderForm() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [formError, setFormError] = useState("");
@@ -102,11 +131,47 @@ function OrderForm() {
   const [remember, setRemember] = useState(() => saved !== null);
   // Changing this remounts the detail fields, clearing them after "Forget".
   const [detailsKey, setDetailsKey] = useState(0);
+  const [phone, setPhone] = useState(() => formatPhone(phoneDigits(saved?.phone ?? "")));
+  const thanksRef = useRef<HTMLDivElement>(null);
+
+  // The thank-you note is much shorter than the form it replaces, so without
+  // this the page shrinks under the visitor and they land on the FAQ.
+  useEffect(() => {
+    if (status !== "sent" || !thanksRef.current) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    thanksRef.current.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+    thanksRef.current.focus({ preventScroll: true });
+  }, [status]);
+
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const caret = input.selectionStart ?? input.value.length;
+    let digits = phoneDigits(input.value);
+    let digitsBeforeCaret = Math.min(phoneDigits(input.value.slice(0, caret)).length, digits.length);
+
+    // Backspacing over ")", " " or "-" removes the digit before it instead.
+    const inputType = (e.nativeEvent as InputEvent).inputType;
+    if (inputType === "deleteContentBackward" && digits === phoneDigits(phone) && digitsBeforeCaret > 0) {
+      digits = digits.slice(0, digitsBeforeCaret - 1) + digits.slice(digitsBeforeCaret);
+      digitsBeforeCaret -= 1;
+    }
+
+    const formatted = formatPhone(digits);
+    // Put the caret back after the same digit it followed before formatting.
+    let pos = 0;
+    for (let seen = 0; pos < formatted.length && seen < digitsBeforeCaret; pos++) {
+      if (/\d/.test(formatted[pos])) seen++;
+    }
+    input.value = formatted;
+    input.setSelectionRange(pos, pos);
+    setPhone(formatted);
+  };
 
   const handleForget = () => {
     forgetDetails();
     setSaved(null);
     setRemember(false);
+    setPhone("");
     setDetailsKey((k) => k + 1);
   };
 
@@ -123,6 +188,18 @@ function OrderForm() {
     }
     setFormError("");
     setStatus("sending");
+
+    // The order sheet and email keep one address column, so send the full
+    // address as one line alongside the separate fields.
+    data.address = [
+      data.street,
+      data.unit,
+      data.city,
+      [data.state, data.zip].filter(Boolean).join(" "),
+    ]
+      .map((s) => (s ?? "").trim())
+      .filter(Boolean)
+      .join(", ");
 
     try {
       if (!ORDER_SHEET_URL) throw new Error("VITE_ORDER_SHEET_URL is not set");
@@ -145,7 +222,12 @@ function OrderForm() {
 
   if (status === "sent") {
     return (
-      <div role="status" className="border border-kava-gold/30 bg-kava-gold/5 rounded-sm p-12 text-center space-y-4">
+      <div
+        ref={thanksRef}
+        tabIndex={-1}
+        role="status"
+        className="border border-kava-gold/30 bg-kava-gold/5 rounded-sm p-12 text-center space-y-4 outline-none"
+      >
         <MailCheck size={36} strokeWidth={1} className="text-kava-gold mx-auto" aria-hidden="true" />
         <h3 className="font-serif text-3xl text-kava-cream">Tankyu tumas. Your order is in.</h3>
         <p className="text-kava-muted font-light max-w-md mx-auto leading-relaxed">
@@ -220,19 +302,61 @@ function OrderForm() {
         </div>
         <div>
           <label htmlFor="phone" className={labelClass}>Phone</label>
-          <input id="phone" name="phone" type="tel" required autoComplete="tel" defaultValue={saved?.phone} className={inputClass} />
-        </div>
-        <div className="md:col-span-2">
-          <label htmlFor="address" className={labelClass}>Delivery or shipping address</label>
-          <textarea
-            id="address"
-            name="address"
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
             required
-            rows={2}
-            autoComplete="street-address"
-            defaultValue={saved?.address}
+            autoComplete="tel-national"
+            inputMode="tel"
+            placeholder="(561) 555-1234"
+            pattern={"\\(\\d{3}\\) \\d{3}-\\d{4}"}
+            title="A 10-digit US phone number, e.g. (561) 555-1234"
+            value={phone}
+            onChange={handlePhoneChange}
             className={inputClass}
           />
+        </div>
+        <div role="group" aria-labelledby="address-heading" className="md:col-span-2 grid grid-cols-2 sm:grid-cols-12 gap-6">
+          <p id="address-heading" className="col-span-2 sm:col-span-12 -mb-3 text-sm text-kava-cream/90 font-light">
+            Delivery or shipping address
+          </p>
+          <div className="col-span-2 sm:col-span-8">
+            <label htmlFor="street" className={labelClass}>Street address</label>
+            <input id="street" name="street" required autoComplete="address-line1" defaultValue={saved?.street} className={inputClass} />
+          </div>
+          <div className="col-span-2 sm:col-span-4">
+            <label htmlFor="unit" className={labelClass}>Suite / unit <span className="normal-case tracking-normal font-normal">(optional)</span></label>
+            <input id="unit" name="unit" autoComplete="address-line2" defaultValue={saved?.unit} className={inputClass} />
+          </div>
+          <div className="col-span-2 sm:col-span-6">
+            <label htmlFor="city" className={labelClass}>City</label>
+            <input id="city" name="city" required autoComplete="address-level2" defaultValue={saved?.city} className={inputClass} />
+          </div>
+          <div className="sm:col-span-3">
+            <label htmlFor="state" className={labelClass}>State</label>
+            <select id="state" name="state" required autoComplete="address-level1" defaultValue={saved?.state ?? ""} className={inputClass}>
+              <option value="" disabled>Select</option>
+              {US_STATES.map(([code, name]) => (
+                <option key={code} value={code}>{name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="sm:col-span-3">
+            <label htmlFor="zip" className={labelClass}>ZIP code</label>
+            <input
+              id="zip"
+              name="zip"
+              required
+              autoComplete="postal-code"
+              inputMode="numeric"
+              maxLength={10}
+              pattern={"\\d{5}(-\\d{4})?"}
+              title="A 5-digit ZIP code, e.g. 33401"
+              defaultValue={saved?.zip}
+              className={inputClass}
+            />
+          </div>
         </div>
         <div className="md:col-span-2">
           <label htmlFor="notes" className={labelClass}>Notes</label>
